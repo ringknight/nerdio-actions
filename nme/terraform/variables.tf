@@ -103,7 +103,7 @@ variable "app_name" {
   description = "Application name prefix"
   type        = string
   default     = "nmw-app"
-  
+
   validation {
     condition     = length(var.app_name) >= 2
     error_message = "The app_name must be at least 2 characters long."
@@ -187,4 +187,21 @@ variable "artifacts_location_sas_token" {
   type        = string
   default     = ""
   sensitive   = true
+}
+
+variable "azure_environment" {
+  description = "Azure cloud environment (public, usgovernment, china)"
+  type        = string
+  default     = "public"
+
+  validation {
+    condition     = contains(["public", "usgovernment", "china"], var.azure_environment)
+    error_message = "The azure_environment must be one of: public, usgovernment, china."
+  }
+}
+
+variable "subscription_id" {
+  description = "Azure subscription ID (optional - uses Azure CLI context if not specified)"
+  type        = string
+  default     = ""
 }

@@ -1,6 +1,6 @@
 terraform {
   required_version = ">= 1.0"
-  
+
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
@@ -14,9 +14,11 @@ terraform {
 }
 
 provider "azurerm" {
+  subscription_id = var.subscription_id != "" ? var.subscription_id : null
+  
   features {
     key_vault {
-      purge_soft_delete_on_destroy = false
+      purge_soft_delete_on_destroy    = false
       recover_soft_deleted_key_vaults = true
     }
   }
@@ -27,18 +29,19 @@ data "azurerm_resource_group" "main" {
   name = var.resource_group_name
 }
 
-data "azurerm_client_config" "current" {}
+data "azurerm_client_config" "current" {
+}
 
 # Partner Center tracking deployment
 resource "azurerm_resource_group_template_deployment" "partner_tracking" {
   name                = "pid-8c1c30c0-3e0a-4655-9e05-51dea63a0e32-partnercenter"
   resource_group_name = data.azurerm_resource_group.main.name
   deployment_mode     = "Incremental"
-  
+
   template_content = jsonencode({
-    "$schema"        = "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#"
-    contentVersion   = "1.0.0.0"
-    resources        = []
+    "$schema"      = "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#"
+    contentVersion = "1.0.0.0"
+    resources      = []
   })
 }
 
@@ -48,7 +51,7 @@ resource "azurerm_log_analytics_workspace" "logs" {
   location            = var.location
   resource_group_name = data.azurerm_resource_group.main.name
   sku                 = "PerGB2018"
-  
+
   tags = merge(
     try(var.tags_by_resource["Microsoft.OperationalInsights/workspaces"], {}),
     {}
@@ -62,7 +65,7 @@ resource "azurerm_application_insights" "main" {
   resource_group_name = data.azurerm_resource_group.main.name
   workspace_id        = azurerm_log_analytics_workspace.logs.id
   application_type    = "web"
-  
+
   tags = merge(
     try(var.tags_by_resource["Microsoft.Insights/components"], {}),
     { displayName = "AppInsightsComponent" }
@@ -79,16 +82,16 @@ resource "azurerm_mssql_server" "main" {
   administrator_login_password  = random_password.sql_admin.result
   minimum_tls_version           = "1.2"
   public_network_access_enabled = !var.configure_private_endpoints
-  
+
   azuread_administrator {
     login_username = "AzureAD Admin"
     object_id      = data.azurerm_client_config.current.object_id
   }
-  
+
   identity {
     type = "SystemAssigned"
   }
-  
+
   tags = merge(
     try(var.tags_by_resource["Microsoft.Sql/servers"], {}),
     { displayName = "SqlServer" }
@@ -103,12 +106,12 @@ resource "random_password" "sql_admin" {
 
 # SQL Database
 resource "azurerm_mssql_database" "main" {
-  name           = local.database_name
-  server_id      = azurerm_mssql_server.main.id
-  collation      = var.sql_collation
-  max_size_gb    = var.database_max_size / 1073741824 # Convert bytes to GB
-  sku_name       = var.database_sku_name
-  
+  name        = local.database_name
+  server_id   = azurerm_mssql_server.main.id
+  collation   = var.sql_collation
+  max_size_gb = var.database_max_size / 1073741824 # Convert bytes to GB
+  sku_name    = var.database_sku_name
+
   tags = merge(
     try(var.tags_by_resource["Microsoft.Sql/servers/databases"], {}),
     { displayName = "Database" }
@@ -131,7 +134,7 @@ resource "azurerm_service_plan" "main" {
   resource_group_name = data.azurerm_resource_group.main.name
   os_type             = "Windows"
   sku_name            = var.app_service_plan_sku_name
-  
+
   tags = try(var.tags_by_resource["Microsoft.Web/serverfarms"], {})
 }
 
@@ -144,69 +147,76 @@ resource "azurerm_windows_web_app" "main" {
   https_only                    = true
   public_network_access_enabled = !(var.configure_private_endpoints && var.private_web_app)
   virtual_network_subnet_id     = var.configure_private_endpoints ? azurerm_subnet.app[0].id : null
-  
+
   identity {
     type = "SystemAssigned"
   }
-  
+
   site_config {
-    always_on                         = true
-    http2_enabled                     = true
-    use_32_bit_worker                 = false
-    ftps_state                        = "Disabled"
-    minimum_tls_version               = "1.3"
+    always_on           = true
+    http2_enabled       = true
+    use_32_bit_worker   = false
+    ftps_state          = "Disabled"
+    minimum_tls_version = "1.3"
     application_stack {
       current_stack  = "dotnet"
       dotnet_version = "v8.0"
     }
   }
 
-    app_settings = {
-      "AzureAd:Instance"                             = local.microsoft_login_uri
-      "Deployment:AzureType"                         = data.azurerm_client_config.current.environment
-      "Deployment:Region"                            = var.location
-      "Deployment:KeyVaultName"                      = local.key_vault_name
-      "Deployment:SubscriptionId"                    = data.azurerm_client_config.current.subscription_id
-      "Deployment:SubscriptionDisplayName"           = data.azurerm_resource_group.main.name # Approximation
-      "Deployment:TenantId"                          = data.azurerm_client_config.current.tenant_id
-      "Deployment:ResourceGroupName"                 = data.azurerm_resource_group.main.name
-      "Deployment:WebAppName"                        = local.web_app_portal_name
-      "Deployment:AutomationAccountName"             = local.automation_account_name
-      "Deployment:AutomationAccountAzInstalled"      = "True"
-      "Deployment:AutomationEnabled"                 = "True"
-      "Deployment:AzureTagPrefix"                    = var.azure_tag_prefix
-      "Deployment:UpdaterRunbookRunAs"               = "nmwUpdateRunAs"
-      "Deployment:LogAnalyticsWorkspace"             = azurerm_log_analytics_workspace.avd.id
-      "Deployment:ScriptedActionAccount"             = azurerm_automation_account.scripted_actions.id
-      "ApplicationInsights:InstrumentationKey"       = azurerm_application_insights.main.instrumentation_key
-      "ApplicationInsights:ConnectionString"         = azurerm_application_insights.main.connection_string
-      "DataProtection:Storage:Type"                  = "AzureBlobStorage"
-      "DataProtection:Protect:KeyIdentifier"         = local.data_protection_key_uri
-      "Deployment:SqlServerId"                       = azurerm_mssql_server.main.id
-    }
-  
+  app_settings = {
+    "AzureAd:Instance"                        = local.microsoft_login_uri
+    "Deployment:AzureType"                    = local.environment
+    "Deployment:Region"                       = var.location
+    "Deployment:KeyVaultName"                 = local.key_vault_name
+    "Deployment:SubscriptionId"               = data.azurerm_client_config.current.subscription_id
+    "Deployment:SubscriptionDisplayName"      = data.azurerm_resource_group.main.name # Approximation
+    "Deployment:TenantId"                     = data.azurerm_client_config.current.tenant_id
+    "Deployment:ResourceGroupName"            = data.azurerm_resource_group.main.name
+    "Deployment:WebAppName"                   = local.web_app_portal_name
+    "Deployment:AutomationAccountName"        = local.automation_account_name
+    "Deployment:AutomationAccountAzInstalled" = "True"
+    "Deployment:AutomationEnabled"            = "True"
+    "Deployment:AzureTagPrefix"               = var.azure_tag_prefix
+    "Deployment:UpdaterRunbookRunAs"          = "nmwUpdateRunAs"
+    "Deployment:LogAnalyticsWorkspace"        = azurerm_log_analytics_workspace.avd.id
+    "Deployment:ScriptedActionAccount"        = azurerm_automation_account.scripted_actions.id
+    "ApplicationInsights:InstrumentationKey"  = azurerm_application_insights.main.instrumentation_key
+    "ApplicationInsights:ConnectionString"    = azurerm_application_insights.main.connection_string
+    "DataProtection:Storage:Type"             = "AzureBlobStorage"
+    "DataProtection:Protect:KeyIdentifier"    = local.data_protection_key_uri
+    "Deployment:SqlServerId"                  = azurerm_mssql_server.main.id
+  }
+
   tags = try(var.tags_by_resource["Microsoft.Web/sites"], {})
 }
 
 # Storage Account for Data Protection
 resource "azurerm_storage_account" "data_protection" {
-  name                             = local.data_protection_storage_account_name
-  location                         = var.location
-  resource_group_name              = data.azurerm_resource_group.main.name
-  account_tier                     = "Standard"
-  account_replication_type         = "GRS"
-  account_kind                     = "StorageV2"
-  min_tls_version                  = "TLS1_2"
-  allow_nested_items_to_be_public  = false
-  shared_access_key_enabled        = true
-  public_network_access_enabled    = !var.configure_private_endpoints
-  
+  name                            = local.data_protection_storage_account_name
+  location                        = var.location
+  resource_group_name             = data.azurerm_resource_group.main.name
+  account_tier                    = "Standard"
+  account_replication_type        = "GRS"
+  account_kind                    = "StorageV2"
+  min_tls_version                 = "TLS1_2"
+  allow_nested_items_to_be_public = false
+  shared_access_key_enabled       = true
+  public_network_access_enabled   = !var.configure_private_endpoints
+
   network_rules {
     default_action = "Allow"
     bypass         = ["AzureServices"]
   }
-  
+
   tags = try(var.tags_by_resource["Microsoft.Storage/storageAccounts"], {})
+}
+
+# Role Assignment - Grant current user Storage Blob Data Contributor on storage account
+resource "azurerm_role_assignment" "storage_current_user" {
+  scope                = azurerm_storage_account.data_protection.id
+  role_definition_name = "Storage Blob Data Contributor"
+  principal_id         = data.azurerm_client_config.current.object_id
 }
 
 # Storage Container for Data Protection Keys
@@ -214,6 +224,8 @@ resource "azurerm_storage_container" "data_protection_keys" {
   name                  = local.data_protection_storage_blob_container
   storage_account_id    = azurerm_storage_account.data_protection.id
   container_access_type = "private"
+  
+  depends_on = [azurerm_role_assignment.storage_current_user]
 }
 
 # Storage Container for Locks
@@ -221,34 +233,37 @@ resource "azurerm_storage_container" "locks" {
   name                  = local.blob_lease_container
   storage_account_id    = azurerm_storage_account.data_protection.id
   container_access_type = "private"
+  
+  depends_on = [azurerm_role_assignment.storage_current_user]
 }
 
 # Key Vault
 resource "azurerm_key_vault" "main" {
-  name                       = local.key_vault_name
-  location                   = var.location
-  resource_group_name        = data.azurerm_resource_group.main.name
-  tenant_id                  = data.azurerm_client_config.current.tenant_id
-  sku_name                   = "standard"
-  soft_delete_retention_days = 90
-  purge_protection_enabled   = false
-  enabled_for_deployment     = false
+  name                          = local.key_vault_name
+  location                      = var.location
+  resource_group_name           = data.azurerm_resource_group.main.name
+  tenant_id                     = data.azurerm_client_config.current.tenant_id
+  sku_name                      = "standard"
+  soft_delete_retention_days    = 90
+  purge_protection_enabled      = false
+  enabled_for_deployment        = false
   public_network_access_enabled = !var.configure_private_endpoints
-  
+
   network_acls {
     bypass         = "AzureServices"
     default_action = var.configure_private_endpoints ? "Deny" : "Allow"
   }
-  
+
+  # Access policy for the Web App managed identity
   access_policy {
     tenant_id = data.azurerm_client_config.current.tenant_id
     object_id = azurerm_windows_web_app.main.identity[0].principal_id
-    
+
     key_permissions = [
       "WrapKey",
       "UnwrapKey"
     ]
-    
+
     secret_permissions = [
       "Get",
       "List",
@@ -256,7 +271,33 @@ resource "azurerm_key_vault" "main" {
       "Delete"
     ]
   }
-  
+
+  # Access policy for the current user (for Terraform operations)
+  access_policy {
+    tenant_id = data.azurerm_client_config.current.tenant_id
+    object_id = data.azurerm_client_config.current.object_id
+
+    key_permissions = [
+      "Get",
+      "List",
+      "Create",
+      "Delete",
+      "Update",
+      "Recover",
+      "Purge",
+      "GetRotationPolicy"
+    ]
+
+    secret_permissions = [
+      "Get",
+      "List",
+      "Set",
+      "Delete",
+      "Recover",
+      "Purge"
+    ]
+  }
+
   tags = try(var.tags_by_resource["Microsoft.KeyVault/vaults"], {})
 }
 
@@ -266,7 +307,7 @@ resource "azurerm_key_vault_key" "data_protection" {
   key_vault_id = azurerm_key_vault.main.id
   key_type     = "RSA"
   key_size     = 2048
-  
+
   key_opts = [
     "decrypt",
     "encrypt",
@@ -301,23 +342,23 @@ data "azurerm_storage_account_sas" "data_protection" {
   connection_string = azurerm_storage_account.data_protection.primary_connection_string
   https_only        = true
   signed_version    = "2017-11-09"
-  
+
   resource_types {
     service   = false
     container = true
     object    = true
   }
-  
+
   services {
     blob  = true
     queue = false
     table = false
     file  = false
   }
-  
+
   start  = "2024-01-01T00:00:00Z"
   expiry = "2050-01-01T00:00:00Z"
-  
+
   permissions {
     read    = true
     write   = true
@@ -337,23 +378,23 @@ data "azurerm_storage_account_sas" "locks" {
   connection_string = azurerm_storage_account.data_protection.primary_connection_string
   https_only        = true
   signed_version    = "2017-11-09"
-  
+
   resource_types {
     service   = false
     container = true
     object    = true
   }
-  
+
   services {
     blob  = true
     queue = false
     table = false
     file  = false
   }
-  
+
   start  = "2024-01-01T00:00:00Z"
   expiry = "2050-01-01T00:00:00Z"
-  
+
   permissions {
     read    = true
     write   = true
@@ -374,7 +415,7 @@ resource "azurerm_automation_account" "scripted_actions" {
   location            = var.location
   resource_group_name = data.azurerm_resource_group.main.name
   sku_name            = "Basic"
-  
+
   tags = try(var.tags_by_resource["Microsoft.Automation/automationAccounts"], {})
 }
 
@@ -384,11 +425,11 @@ resource "azurerm_automation_account" "main" {
   location            = var.location
   resource_group_name = data.azurerm_resource_group.main.name
   sku_name            = "Basic"
-  
+
   identity {
     type = "SystemAssigned"
   }
-  
+
   tags = try(var.tags_by_resource["Microsoft.Automation/automationAccounts"], {})
 }
 
@@ -437,12 +478,12 @@ resource "azurerm_automation_runbook" "update_run_as" {
   log_progress            = false
   description             = "Update using automation Run As account"
   runbook_type            = "PowerShell"
-  
+
   publish_content_link {
     uri     = "${var.artifacts_location}scripts/nmw-update-run-as.ps1${var.artifacts_location_sas_token}"
     version = "1.0.0.0"
   }
-  
+
   tags = try(var.tags_by_resource["Microsoft.Automation/automationAccounts/runbooks"], {})
 }
 
@@ -452,7 +493,7 @@ resource "azurerm_log_analytics_workspace" "avd" {
   location            = var.location
   resource_group_name = data.azurerm_resource_group.main.name
   sku                 = "PerGB2018"
-  
+
   tags = merge(
     try(var.tags_by_resource["Microsoft.OperationalInsights/workspaces"], {}),
     { NMW_OBJECT_TYPE = "LOG_ANALYTICS_WORKSPACE" }
