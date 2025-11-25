@@ -6,19 +6,19 @@ This directory contains Terraform configuration files converted from the origina
 
 This Terraform configuration deploys a complete Nerdio Manager for Enterprise environment, including:
 
-- **App Service** - Windows Web App for NMW portal
+- **App Service** - Windows Web App for NME portal
 - **SQL Database** - Azure SQL Server and Database
 - **Key Vault** - Secure storage for secrets and keys
 - **Storage Account** - For data protection and locks
 - **Automation Accounts** - For automated management tasks
 - **Log Analytics Workspaces** - For monitoring and insights
 - **Application Insights** - Application performance monitoring
-- **Networking** (optional) - VNet, subnets, private endpoints, and private DNS zones
+- **Networking** (optional) - vnet, subnets, private endpoints, and private DNS zones
 
 ## Files Structure
 
 - `main.tf` - Core Azure resources (App Service, SQL, Key Vault, Storage, Automation)
-- `network.tf` - Networking resources (VNet, subnets, private endpoints, DNS zones)
+- `network.tf` - Networking resources (vnet, subnets, private endpoints, DNS zones)
 - `variables.tf` - Input variable definitions
 - `locals.tf` - Local values and naming conventions
 - `outputs.tf` - Output values
@@ -105,7 +105,7 @@ terraform output
 1. **Resource Names** - Unique string generation uses SHA256 hash instead of ARM's uniqueString()
 2. **Environment Detection** - Uses azurerm_client_config data source
 3. **Managed Identities** - Automatically configured for Web App and Automation Account
-4. **SQL Authentication** - Generates random password, but AAD auth is recommended
+4. **SQL Authentication** - Generates random password, but Entra auth is recommended
 5. **SAS Tokens** - Generated using data sources instead of listServiceSas()
 
 ## Post-Deployment
@@ -114,7 +114,7 @@ After deployment:
 
 1. **Configure SQL Database** - Run database migrations
 2. **Upload Web App Package** - Deploy application code (not included in Terraform)
-3. **Configure Azure AD** - Set up authentication
+3. **Configure Entra ID** - Set up authentication
 4. **Review Security** - Verify Key Vault access policies and network rules
 5. **Test Connectivity** - Verify all services are accessible
 
@@ -124,7 +124,7 @@ After deployment:
 
 The SQL Server password is randomly generated. Consider:
 
-- Using Azure AD authentication instead
+- Using Entra ID authentication instead
 - Storing password in Key Vault (currently generates random)
 - Implementing password rotation
 
@@ -237,7 +237,7 @@ This document summarizes the conversion of the Nerdio Manager for Enterprise ARM
 | Microsoft.Resources/deployments | azurerm_resource_group_template_deployment | Partner tracking deployment |
 | Microsoft.OperationalInsights/workspaces | azurerm_log_analytics_workspace | Two workspaces: logs and AVD monitoring |
 | Microsoft.Insights/components | azurerm_application_insights | Application monitoring |
-| Microsoft.Sql/servers | azurerm_mssql_server | SQL Server with AAD authentication |
+| Microsoft.Sql/servers | azurerm_mssql_server | SQL Server with Entra authentication |
 | Microsoft.Sql/servers/databases | azurerm_mssql_database | SQL Database |
 | Microsoft.Sql/servers/firewallRules | azurerm_mssql_firewall_rule | Conditional on private endpoints |
 | Microsoft.Web/serverfarms | azurerm_service_plan | App Service Plan |
@@ -303,13 +303,13 @@ microsoft_login_uri = data.azurerm_client_config.current.environment == "public"
 ### 3. SQL Server Authentication
 
 **ARM Template:**
-- Uses Azure AD authentication exclusively
+- Uses Entra ID authentication exclusively
 - No administrator password in template
 
 **Terraform:**
 - Generates random password for SQL admin (stored in state)
-- Also configures Azure AD authentication
-- **Recommendation:** Use Azure AD auth and manage passwords externally
+- Also configures Entra ID authentication
+- **Recommendation:** Use Entra ID auth and manage passwords externally
 
 ### 4. SAS Token Generation
 
@@ -440,7 +440,7 @@ count = var.configure_private_endpoints ? 0 : 1
 
 1. **Web App Code Deployment** - Must be done separately
 2. **Database Schema** - SQL migrations need to be run post-deployment
-3. **Azure AD Configuration** - Application registration and permissions
+3. **Entra ID Configuration** - Application registration and permissions
 4. **Monitoring Alerts** - Consider adding azurerm_monitor_metric_alert resources
 5. **Backup Configuration** - Consider azurerm_backup_* resources
 6. **Data Collection Rules** - Full DCR configuration from ARM template (partially implemented)
