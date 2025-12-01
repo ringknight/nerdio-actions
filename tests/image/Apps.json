@@ -451,9 +451,9 @@
         "RegValueNotExits": []
     },
     {
-        "Name": "Microsoft VcRedist 2022 x64",
-        "Filter": "Get-VcList -Release \"2022\" -Architecture \"x64\"",
-        "Installed": "Microsoft Visual C.*2015-2022 Redistributable.*x64",
+        "Name": "Microsoft VcRedist 14 x64",
+        "Filter": "Get-VcList -Release \"14\" -Architecture \"x64\"",
+        "Installed": "Microsoft Visual C.*14 Redistributable.*x64",
         "FilesExist": [],
         "FilesNotExist": [],
         "ServicesDisabled": [],
@@ -464,9 +464,9 @@
         "RegValueNotExits": []
     },
     {
-        "Name": "Microsoft VcRedist 2022 x86",
-        "Filter": "Get-VcList -Release \"2022\" -Architecture \"x86\"",
-        "Installed": "Microsoft Visual C.*2015-2022 Redistributable.*x86",
+        "Name": "Microsoft VcRedist 14 x86",
+        "Filter": "Get-VcList -Release \"14\" -Architecture \"x86\"",
+        "Installed": "Microsoft Visual C.*14 Redistributable.*x86",
         "FilesExist": [],
         "FilesNotExist": [],
         "ServicesDisabled": [],
