@@ -26,7 +26,7 @@ resource "azurerm_windows_web_app" "nerdio" {
     "ApplicationInsights:ConnectionString"   = azurerm_application_insights.nerdio.connection_string
     "ApplicationInsights:InstrumentationKey" = azurerm_application_insights.nerdio.instrumentation_key
     "AzureAd:Instance"                       = "https://login.microsoftonline.com/"
-    "AzureAd:ClientId"                       = azuread_application.nerdio_manager.application_id
+    "AzureAd:ClientId"                       = azuread_application.nerdio_manager.client_id
     "AzureAd:TenantId"                       = data.azurerm_subscription.current.tenant_id
     "Billing:Mode"                           = "MAU"
     "Deployment:AutomationAccountName"       = azurerm_automation_account.nerdio.name
@@ -76,7 +76,7 @@ resource "azurerm_private_endpoint" "webapp" {
     private_dns_zone_ids = [
       azurerm_private_dns_zone.private_link["website"].id
     ]
-    
+
   }
 
   private_service_connection {
