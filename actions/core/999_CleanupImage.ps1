@@ -44,7 +44,7 @@ $Targets | ForEach-Object {
     $Target = $_
     Get-InstalledSoftware | Where-Object { $_.Name -match $Target } | ForEach-Object {
         Write-Host "Uninstalling: $($_.Publisher) $($_.Name) $($_.Version)"
-        
+
         if ($_.UninstallString -match "msiexec") {
             # Match the GUID in the uninstall string
             $GuidMatches = [Regex]::Match($_.UninstallString, "({[A-Z0-9]{8}-([A-Z0-9]{4}-){3}[A-Z0-9]{12}})")

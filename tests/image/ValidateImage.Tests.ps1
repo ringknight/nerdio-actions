@@ -48,7 +48,7 @@ Describe "Validate <App.Name>" -ForEach $Applications {
                 "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\*",
                 "HKLM:\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\*"
             )
-        
+
             $Apps = @()
             foreach ($Key in $UninstallKeys) {
                 $propertyNames = "DisplayName", "DisplayVersion", "Publisher", "UninstallString", "PSPath", "WindowsInstaller", "InstallDate", "InstallSource", "HelpLink", "Language", "EstimatedSize", "SystemComponent"

@@ -82,22 +82,22 @@ process {
 
     foreach ($Version in $SupportedVersions.GetEnumerator()) {
         $Config = $Version.Value
-        
+
         # Check ProductType matches
         if ($ProductType -ne $Config.ProductType) {
             continue
         }
-        
+
         # Check build number is within range
         $BuildInRange = $BuildNumber -ge $Config.BuildMin
         if ($Config.ContainsKey("BuildMax")) {
             $BuildInRange = $BuildInRange -and ($BuildNumber -le $Config.BuildMax)
         }
-        
+
         if (-not $BuildInRange) {
             continue
         }
-        
+
         # Check SKU matches (if SKU is available and valid)
         if ($SKU -gt 0 -and $Config.SKUs -contains $SKU) {
             $IsSupported = $true

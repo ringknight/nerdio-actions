@@ -1,7 +1,7 @@
 <#
     .DESCRIPTION
-    This script deletes registry keys associated with the Windows Update Orchestrator's 
-    UScheduler for specific applications such as DevHomeUpdate, OutlookUpdate, and MS_Outlook. 
+    This script deletes registry keys associated with the Windows Update Orchestrator's
+    UScheduler for specific applications such as DevHomeUpdate, OutlookUpdate, and MS_Outlook.
 
     Run script at initial session host deployment
 #>

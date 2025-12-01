@@ -3,9 +3,9 @@
     Prepares a Remote Desktop Services (RDS) / Azure Virtual Desktop (AVD) image for customization.
 
 .DESCRIPTION
-    This script sets up logging functions, configures Windows registry settings for image deployment, 
-    and applies optimizations for Windows 11 and RDS/AVD environments. It includes functions for logging, 
-    command execution with logging, and retrieving Nerdio variable lists. The script also applies 
+    This script sets up logging functions, configures Windows registry settings for image deployment,
+    and applies optimizations for Windows 11 and RDS/AVD environments. It includes functions for logging,
+    command execution with logging, and retrieving Nerdio variable lists. The script also applies
     recommended registry settings for time zone redirection and keyboard layout handling.
 
 .FUNCTIONS

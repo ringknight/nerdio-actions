@@ -106,7 +106,7 @@ if ([System.String]::IsNullOrEmpty($SecureVars.VariablesList)) {
   </AppSettings>
   <Display Level="None" AcceptEULA="TRUE" />
 </Configuration>
-"@    
+"@
 }
 else {
     $Variables = Get-NerdioVariablesList

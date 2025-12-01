@@ -29,7 +29,7 @@ param (
     [Parameter(Position = 0, Mandatory = $false)]
     [System.String[]] $FilePaths = @("$Env:ProgramFiles\Omnissa",
         "${Env:ProgramFiles}\Omnissa",
-        "${Env:ProgramFiles}\WorkspaceONE",    
+        "${Env:ProgramFiles}\WorkspaceONE",
         "${Env:CommonProgramFiles(x86)}\Omnissa",
         "${Env:CommonProgramFiles(x86)}\WorkspaceONE",
         "${Env:CommonProgramFiles}\Omnissa",

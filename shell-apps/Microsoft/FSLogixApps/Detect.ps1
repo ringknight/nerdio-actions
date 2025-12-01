@@ -19,7 +19,7 @@ else {
         $ProductVersion = [System.Version]::Parse("$($FileInfo.ProductVersion).0")
         $ContextVersion = [System.Version]::Parse("$($Context.TargetVersion).0")
         $CompareContextVersion = [System.Version]::Parse("3.$($ContextVersion.Major).0")
-    
+
         if ($ProductVersion -ge $CompareContextVersion) {
             $Context.Log("No update required. Found '$($ProductVersion.ToString())' against '$($CompareContextVersion.ToString())'.")
             if ($Context.Versions -is [System.Array]) { return $Context.TargetVersion } else { return $true }
