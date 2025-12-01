@@ -17,10 +17,9 @@
     .NOTES
     - This script requires the "VcRedist" module to be installed.
     - The script must be run with administrative privileges.
-    - The script supports the following versions of Microsoft Visual C++ Redistributables: 2012, 2013, 2022.
 #>
 
-#description: Installs the supported Microsoft Visual C++ Redistributables (2012, 2013, 2022)
+#description: Installs the supported Microsoft Visual C++ Redistributables
 #execution mode: Combined
 #tags: VcRedist, Microsoft
 #Requires -Modules VcRedist

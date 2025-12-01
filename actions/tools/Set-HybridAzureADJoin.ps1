@@ -1,4 +1,4 @@
-#description: Enables Hybrid Azure AD join registry entries
+#description: Enables Hybrid Entra ID join registry entries
 #execution mode: Combined
 #tags: Image, HAADJ
 
