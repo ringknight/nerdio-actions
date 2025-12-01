@@ -507,4 +507,4 @@ terraform plan -var="resource_group_name=rg-NerdioManager1-aue" -out ./main.tfpl
 terraform apply ./main.tfplan
 terraform apply -var="resource_group_name=rg-NerdioManager1-aue" -auto-approve
 terraform destroy -var="resource_group_name=rg-NerdioManager1-aue" -auto-approve
-az resource list --resource-group rg-NerdioManager1-aue --output table 
+az resource list --resource-group rg-NerdioManager1-aue --output table

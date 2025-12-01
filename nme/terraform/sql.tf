@@ -71,7 +71,7 @@ resource "azurerm_private_endpoint" "sql" {
     private_dns_zone_ids = [
       azurerm_private_dns_zone.private_link["sqlserver"].id
     ]
-  
+
   }
 
   private_service_connection {

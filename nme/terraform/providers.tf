@@ -1,7 +1,7 @@
 
 
 provider "azurerm" {
-  
+
   storage_use_azuread = true
   features {
     application_insights {

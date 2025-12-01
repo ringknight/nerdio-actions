@@ -19,9 +19,7 @@ resource "azurerm_key_vault" "nerdio" {
   tags = var.tags
 }
 
-#
 # Access Policies
-#
 resource "azurerm_key_vault_access_policy" "nerdio_webapp" {
   key_vault_id = azurerm_key_vault.nerdio.id
   tenant_id    = data.azurerm_client_config.current.tenant_id
@@ -45,10 +43,10 @@ resource "azurerm_key_vault_access_policy" "nerdio_service_principal" {
   ]
 }
 
-resource "azurerm_key_vault_access_policy" "nerdio_WVDAdmin" { 
+resource "azurerm_key_vault_access_policy" "nerdio_WVDAdmin" {
     key_vault_id = azurerm_key_vault.nerdio.id
     tenant_id = data.azurerm_client_config.current.tenant_id
-    #object_id =  "b0fae5ac-6380-4d7d-9b28-bd51f9fc65fe" #need to resolve as to why it can't get the object ID 
+    #object_id =  "b0fae5ac-6380-4d7d-9b28-bd51f9fc65fe" #need to resolve as to why it can't get the object ID
     object_id =  data.azuread_client_config.current.object_id
 
       secret_permissions = [
@@ -76,7 +74,7 @@ resource "azurerm_key_vault_access_policy" "nerdio_WVDAdmin" {
       "Update",
       "Import",
       "Delete"
-      
+
     ]
 
     storage_permissions = [
@@ -88,7 +86,7 @@ resource "azurerm_key_vault_access_policy" "nerdio_WVDAdmin" {
       "RegenerateKey"
     ]
 
-    certificate_permissions = [ 
+    certificate_permissions = [
 
       "Get",
       "List",
@@ -98,17 +96,12 @@ resource "azurerm_key_vault_access_policy" "nerdio_WVDAdmin" {
       "Delete",
       "Recover",
       "Backup",
-      "Restore"   
+      "Restore"
 
      ]
   }
-  
-  
 
-
-#
 # Secrets
-#
 resource "azurerm_key_vault_secret" "azuread_client_secret" {
   name         = "AzureAD--ClientSecret"
   value        = azuread_service_principal_password.nerdio_manager.value
@@ -140,9 +133,7 @@ depends_on = [ azurerm_key_vault_access_policy.nerdio_WVDAdmin ]
 
 }
 
-#
 # Private Endpoint
-#
 resource "azurerm_private_endpoint" "key_vault" {
   name                = "${azurerm_key_vault.nerdio.name}-ple"
   resource_group_name = azurerm_key_vault.nerdio.resource_group_name

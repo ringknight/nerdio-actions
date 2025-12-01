@@ -27,7 +27,7 @@ variable "packageUri" {
     condition     = can(regex("https://.*\\.zip", var.packageUri))
     error_message = "The packageUri must be a valid HTTPS URL ending with .zip"
   }
-  
+
 }
 
 variable "vnet_address_space" {

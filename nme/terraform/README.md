@@ -15,12 +15,14 @@ This Terraform module deployes [Nerdio Manager for Enterprise][nme] with the har
 The module supports both creating a new resource group or using an existing one:
 
 ### Create a new resource group with auto-generated name
+
 ```hcl
 base_name = "nerdio-prod"
 # Resource group will be named: nerdio-prod-rg
 ```
 
 ### Create a new resource group with custom name
+
 ```hcl
 base_name = "nerdio-prod"
 resource_group_name = "my-custom-rg-name"
@@ -28,6 +30,7 @@ create_resource_group = true
 ```
 
 ### Use an existing resource group
+
 ```hcl
 base_name = "nerdio-prod"
 resource_group_name = "existing-rg-name"

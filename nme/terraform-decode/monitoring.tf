@@ -8,7 +8,7 @@ resource "azurerm_log_analytics_datasource_windows_event" "system" {
   workspace_name      = azurerm_log_analytics_workspace.avd.name
   event_log_name      = "System"
   event_types         = ["Error", "Warning"]
-  
+
   depends_on = [azurerm_log_analytics_workspace.avd]
 }
 
@@ -18,7 +18,7 @@ resource "azurerm_log_analytics_datasource_windows_event" "application" {
   workspace_name      = azurerm_log_analytics_workspace.avd.name
   event_log_name      = "Application"
   event_types         = ["Error", "Warning"]
-  
+
   depends_on = [azurerm_log_analytics_workspace.avd]
 }
 
@@ -28,7 +28,7 @@ resource "azurerm_log_analytics_datasource_windows_event" "terminal_services_loc
   workspace_name      = azurerm_log_analytics_workspace.avd.name
   event_log_name      = "Microsoft-Windows-TerminalServices-LocalSessionManager/Operational"
   event_types         = ["Error", "Warning", "Information"]
-  
+
   depends_on = [azurerm_log_analytics_workspace.avd]
 }
 
@@ -38,7 +38,7 @@ resource "azurerm_log_analytics_datasource_windows_event" "terminal_services_rem
   workspace_name      = azurerm_log_analytics_workspace.avd.name
   event_log_name      = "Microsoft-Windows-TerminalServices-RemoteConnectionManager/Admin"
   event_types         = ["Error", "Warning", "Information"]
-  
+
   depends_on = [azurerm_log_analytics_workspace.avd]
 }
 
@@ -48,7 +48,7 @@ resource "azurerm_log_analytics_datasource_windows_event" "fslogix_operational" 
   workspace_name      = azurerm_log_analytics_workspace.avd.name
   event_log_name      = "Microsoft-FSLogix-Apps/Operational"
   event_types         = ["Error", "Warning", "Information"]
-  
+
   depends_on = [azurerm_log_analytics_workspace.avd]
 }
 
@@ -58,7 +58,7 @@ resource "azurerm_log_analytics_datasource_windows_event" "fslogix_admin" {
   workspace_name      = azurerm_log_analytics_workspace.avd.name
   event_log_name      = "Microsoft-FSLogix-Apps/Admin"
   event_types         = ["Error", "Warning", "Information"]
-  
+
   depends_on = [azurerm_log_analytics_workspace.avd]
 }
 
@@ -71,7 +71,7 @@ resource "azurerm_log_analytics_datasource_windows_performance_counter" "disk_fr
   instance_name       = "C:"
   counter_name        = "% Free Space"
   interval_seconds    = 60
-  
+
   depends_on = [azurerm_log_analytics_workspace.avd]
 }
 
@@ -83,7 +83,7 @@ resource "azurerm_log_analytics_datasource_windows_performance_counter" "disk_av
   instance_name       = "C:"
   counter_name        = "Avg. Disk Queue Length"
   interval_seconds    = 60
-  
+
   depends_on = [azurerm_log_analytics_workspace.avd]
 }
 
@@ -95,7 +95,7 @@ resource "azurerm_log_analytics_datasource_windows_performance_counter" "disk_av
   instance_name       = "C:"
   counter_name        = "Avg. Disk sec/Transfer"
   interval_seconds    = 60
-  
+
   depends_on = [azurerm_log_analytics_workspace.avd]
 }
 
@@ -107,7 +107,7 @@ resource "azurerm_log_analytics_datasource_windows_performance_counter" "disk_cu
   instance_name       = "C:"
   counter_name        = "Current Disk Queue Length"
   interval_seconds    = 60
-  
+
   depends_on = [azurerm_log_analytics_workspace.avd]
 }
 
@@ -119,7 +119,7 @@ resource "azurerm_log_analytics_datasource_windows_performance_counter" "disk_re
   instance_name       = "C:"
   counter_name        = "Disk Reads/sec"
   interval_seconds    = 60
-  
+
   depends_on = [azurerm_log_analytics_workspace.avd]
 }
 
@@ -131,7 +131,7 @@ resource "azurerm_log_analytics_datasource_windows_performance_counter" "disk_tr
   instance_name       = "C:"
   counter_name        = "Disk Transfers/sec"
   interval_seconds    = 60
-  
+
   depends_on = [azurerm_log_analytics_workspace.avd]
 }
 
@@ -143,7 +143,7 @@ resource "azurerm_log_analytics_datasource_windows_performance_counter" "disk_wr
   instance_name       = "C:"
   counter_name        = "Disk Writes/sec"
   interval_seconds    = 60
-  
+
   depends_on = [azurerm_log_analytics_workspace.avd]
 }
 
@@ -155,7 +155,7 @@ resource "azurerm_log_analytics_datasource_windows_performance_counter" "memory_
   instance_name       = "*"
   counter_name        = "Available Mbytes"
   interval_seconds    = 60
-  
+
   depends_on = [azurerm_log_analytics_workspace.avd]
 }
 
@@ -167,7 +167,7 @@ resource "azurerm_log_analytics_datasource_windows_performance_counter" "memory_
   instance_name       = "*"
   counter_name        = "Page Faults/sec"
   interval_seconds    = 60
-  
+
   depends_on = [azurerm_log_analytics_workspace.avd]
 }
 
@@ -179,7 +179,7 @@ resource "azurerm_log_analytics_datasource_windows_performance_counter" "memory_
   instance_name       = "*"
   counter_name        = "Pages/sec"
   interval_seconds    = 60
-  
+
   depends_on = [azurerm_log_analytics_workspace.avd]
 }
 
@@ -191,7 +191,7 @@ resource "azurerm_log_analytics_datasource_windows_performance_counter" "memory_
   instance_name       = "*"
   counter_name        = "% Committed Bytes In Use"
   interval_seconds    = 60
-  
+
   depends_on = [azurerm_log_analytics_workspace.avd]
 }
 
@@ -203,7 +203,7 @@ resource "azurerm_log_analytics_datasource_windows_performance_counter" "physica
   instance_name       = "*"
   counter_name        = "Avg. Disk sec/Read"
   interval_seconds    = 60
-  
+
   depends_on = [azurerm_log_analytics_workspace.avd]
 }
 
@@ -215,7 +215,7 @@ resource "azurerm_log_analytics_datasource_windows_performance_counter" "physica
   instance_name       = "*"
   counter_name        = "Avg. Disk sec/Write"
   interval_seconds    = 60
-  
+
   depends_on = [azurerm_log_analytics_workspace.avd]
 }
 
@@ -227,7 +227,7 @@ resource "azurerm_log_analytics_datasource_windows_performance_counter" "process
   instance_name       = "_Total"
   counter_name        = "% Processor Time"
   interval_seconds    = 60
-  
+
   depends_on = [azurerm_log_analytics_workspace.avd]
 }
 
@@ -239,7 +239,7 @@ resource "azurerm_log_analytics_datasource_windows_performance_counter" "termina
   instance_name       = "*"
   counter_name        = "Active Sessions"
   interval_seconds    = 60
-  
+
   depends_on = [azurerm_log_analytics_workspace.avd]
 }
 
@@ -251,7 +251,7 @@ resource "azurerm_log_analytics_datasource_windows_performance_counter" "user_in
   instance_name       = "*"
   counter_name        = "Max Input Delay"
   interval_seconds    = 60
-  
+
   depends_on = [azurerm_log_analytics_workspace.avd]
 }
 
@@ -263,7 +263,7 @@ resource "azurerm_log_analytics_datasource_windows_performance_counter" "user_in
   instance_name       = "*"
   counter_name        = "Max Input Delay"
   interval_seconds    = 60
-  
+
   depends_on = [azurerm_log_analytics_workspace.avd]
 }
 
@@ -275,6 +275,6 @@ resource "azurerm_log_analytics_datasource_windows_performance_counter" "network
   instance_name       = "*"
   counter_name        = "Bytes Total/sec"
   interval_seconds    = 60
-  
+
   depends_on = [azurerm_log_analytics_workspace.avd]
 }

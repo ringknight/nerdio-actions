@@ -2,7 +2,7 @@
 
 To prepare a virtual machine to be migrated from a third party virtual desktop solution to Azure Virtual Desktop or Windows 365, scripts here can be used to uninstall third party agents and install the required Microsoft agents.
 
-> [!WARNING]  
+> [!WARNING]
 > Uninstall scripts will uninstall target agents without confirmation. Use the `-WhatIf` parameter to determine which software will be uninstalled.
 
 > [!CAUTION]
