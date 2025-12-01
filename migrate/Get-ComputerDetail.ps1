@@ -6,7 +6,7 @@
     This script gathers a comprehensive set of attributes about the current machine and last logged-on user:
 
     - Identity and join status:
-        - Azure AD (Entra ID) and domain join state via dsregcmd.exe /status.
+        - Entra ID (Entra ID) and domain join state via dsregcmd.exe /status.
     - Last logged-on user details:
         - Display name, SAM account, SID, and selected user SID from HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Authentication\LogonUI.
     - User profiles:
