@@ -83,8 +83,6 @@ required_resource_access {
       id   = "41094075-9dad-400e-a0bd-54e686782033"
       type = "Scope"
     }
-
-
   }
 
   required_resource_access {
@@ -108,8 +106,7 @@ required_resource_access {
       id   = data.azuread_service_principal.msgraph.app_role_ids["GroupMember.Read.All"]
       type = "Role"
     }
-   
-    
+
 
     # Delegated permissions
     dynamic "resource_access" {
@@ -204,11 +201,9 @@ resource "time_rotating" "nerdio_service_principal" {
   rotation_days = 90
 }
 
-#
 # Role Assignments
-#
 resource "azurerm_role_assignment" "nerdio_rg_contributor" {
-  scope                = azurerm_resource_group.nerdio.id
+  scope                = var.create_resource_group ? azurerm_resource_group.nerdio[0].id : data.azurerm_resource_group.existing[0].id
   role_definition_name = "Contributor"
   principal_id         = azuread_service_principal.nerdio_manager.object_id
 }
