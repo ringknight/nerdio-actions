@@ -14,7 +14,7 @@ function Get-InstalledSoftware {
     }
 }
 
-Get-InstalledSoftware | Where-Object { $_.Name -match "Microsoft Visual C\+\+ 2015-2022 Redistributable (x64)*" } | ForEach-Object {
+Get-InstalledSoftware | Where-Object { $_.Name -match "Microsoft Visual C\+\+ 14 Redistributable (x64)*" } | ForEach-Object {
     if ($_.UninstallString -match '"([^"]+)"') {
         $Context.Log("Uninstall with: $($Matches[1])")
         $params = @{

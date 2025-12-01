@@ -1,5 +1,5 @@
 {
-    "name": "Visual C++ Redistributable 2022 x64",
+    "name": "Visual C++ Redistributable 14 x64",
     "description": "The Visual C++ Redistributable installs runtime components that are required to run applications developed with Visual C++.",
     "isPublic": true,
     "publisher": "Microsoft",
@@ -20,6 +20,6 @@
     ],
     "source": {
         "type": "VcRedist",
-        "filter": "$_.Architecture -eq \"x64\" -and $_.Release -eq \"2022\""
+        "filter": "$_.Architecture -eq \"x64\" -and $_.Release -eq \"14\""
     }
 }
