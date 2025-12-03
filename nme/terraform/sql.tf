@@ -51,6 +51,8 @@ resource "azuread_group" "sql_admins" {
 resource "azuread_group_member" "nerdio_webapp_sql_admin" {
   group_object_id  = azuread_group.sql_admins.id
   member_object_id = azurerm_windows_web_app.nerdio.identity[0].principal_id
+
+  depends_on = [ azurerm_windows_web_app.nerdio ]
 }
 
 # Private Endpoint
@@ -75,7 +77,6 @@ resource "azurerm_private_endpoint" "sql" {
     subresource_names              = ["sqlServer"]
   }
 
-
-depends_on = [ azapi_resource.msdeploy,azurerm_key_vault_access_policy.nerdio_service_principal,azurerm_key_vault_access_policy.nerdio_webapp,azurerm_key_vault_certificate.nerdio,azurerm_key_vault_secret.azuread_client_secret,azurerm_key_vault_secret.sql_connection ]
+  # depends_on = [ azapi_resource.msdeploy,azurerm_key_vault_access_policy.nerdio_service_principal,azurerm_key_vault_access_policy.nerdio_webapp,azurerm_key_vault_certificate.nerdio,azurerm_key_vault_secret.azuread_client_secret,azurerm_key_vault_secret.sql_connection ]
   tags = var.tags
 }

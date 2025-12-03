@@ -85,12 +85,12 @@ resource "azurerm_private_endpoint" "webapp" {
     subresource_names              = ["sites"]
   }
 
-depends_on = [ azapi_resource.msdeploy,azurerm_key_vault_access_policy.nerdio_service_principal,azurerm_key_vault_access_policy.nerdio_webapp,azurerm_key_vault_certificate.nerdio,azurerm_key_vault_secret.azuread_client_secret,azurerm_key_vault_secret.sql_connection ]
+  # depends_on = [ azapi_resource.msdeploy,azurerm_key_vault_access_policy.nerdio_service_principal,azurerm_key_vault_access_policy.nerdio_webapp,azurerm_key_vault_certificate.nerdio,azurerm_key_vault_secret.azuread_client_secret,azurerm_key_vault_secret.sql_connection ]
   tags = var.tags
 }
 
 resource "azapi_resource" "msdeploy" {
-  type = "Microsoft.Web/sites/extensions@2022-03-01"
+  type = "Microsoft.Web/sites/extensions@2025-03-01"
   name = "MSDeploy"
   parent_id = azurerm_windows_web_app.nerdio.id
   body = jsonencode({
@@ -101,6 +101,13 @@ resource "azapi_resource" "msdeploy" {
 #    kind = "string"
   })
 
-  depends_on = [ azurerm_service_plan.nerdio,azurerm_windows_web_app.nerdio,azurerm_mssql_database.nerdio,azurerm_key_vault.nerdio,azurerm_mssql_server.nerdio]
+  depends_on = [ 
+    azurerm_windows_web_app.nerdio,
+    azurerm_private_endpoint.webapp,
+    azurerm_private_endpoint.key_vault,
+    azurerm_private_endpoint.sql,
+    azurerm_key_vault_access_policy.nerdio_webapp,
+    azurerm_key_vault_secret.sql_connection
+  ]
 }
 
