@@ -5,13 +5,11 @@ resource "random_password" "sql_password" {
 }
 
 resource "azurerm_mssql_database" "nerdio" {
-  name      = "Nerdio"
+  name      = "NerdioManager"
   server_id = azurerm_mssql_server.nerdio.id
   collation = "Latin1_General_CI_AS"
   sku_name  = var.sql_sku
-
   zone_redundant = false
-
   tags = var.tags
 }
 
@@ -43,9 +41,7 @@ resource "azurerm_mssql_server" "nerdio" {
   tags = var.tags
 }
 
-#
 # Entra ID Admin Group
-#
 resource "azuread_group" "sql_admins" {
   display_name            = "Azure SQL Server Administrators - ${lower(var.base_name)}-sql"
   prevent_duplicate_names = true
@@ -57,9 +53,7 @@ resource "azuread_group_member" "nerdio_webapp_sql_admin" {
   member_object_id = azurerm_windows_web_app.nerdio.identity[0].principal_id
 }
 
-#
 # Private Endpoint
-#
 resource "azurerm_private_endpoint" "sql" {
   name                = "${azurerm_mssql_server.nerdio.name}-ple"
   resource_group_name = azurerm_mssql_server.nerdio.resource_group_name
