@@ -76,7 +76,6 @@ resource "azurerm_private_endpoint" "webapp" {
     private_dns_zone_ids = [
       azurerm_private_dns_zone.private_link["website"].id
     ]
-
   }
 
   private_service_connection {

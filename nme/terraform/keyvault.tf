@@ -74,7 +74,6 @@ resource "azurerm_key_vault_access_policy" "nerdio_WVDAdmin" {
       "Update",
       "Import",
       "Delete"
-
     ]
 
     storage_permissions = [
@@ -87,7 +86,6 @@ resource "azurerm_key_vault_access_policy" "nerdio_WVDAdmin" {
     ]
 
     certificate_permissions = [
-
       "Get",
       "List",
       "Update",
@@ -97,7 +95,6 @@ resource "azurerm_key_vault_access_policy" "nerdio_WVDAdmin" {
       "Recover",
       "Backup",
       "Restore"
-
      ]
   }
 

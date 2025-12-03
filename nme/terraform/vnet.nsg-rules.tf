@@ -54,9 +54,7 @@ resource "azurerm_network_security_rule" "webapp_to_automation" {
   network_security_group_name  = azurerm_network_security_group.nerdio.name
 }
 
-#
 # Deny all
-#
 resource "azurerm_network_security_rule" "inbound_deny_all" {
   name                        = "Inbound-Deny-All"
   priority                    = 4096

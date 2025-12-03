@@ -18,9 +18,7 @@ resource "azurerm_log_analytics_workspace" "nerdio" {
   tags = merge(var.tags, { "${var.nerdio_tag_prefix}_OBJECT_TYPE" = "LOG_ANALYTICS_WORKSPACE" })
 }
 
-#
 # Solutions to enable Azure Defender
-#
 resource "azurerm_log_analytics_solution" "security" {
   solution_name         = "Security"
   location              = local.resource_group_location

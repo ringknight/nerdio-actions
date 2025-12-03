@@ -12,14 +12,12 @@ resource "azuread_app_role_assignment" "desktop_users" {
   app_role_id         = "e856de81-1e53-486a-8668-7d564866ae39"
 }
 
-
 resource "azuread_app_role_assignment" "help_desk" {
   for_each = data.azuread_user.helpdesk_users
   principal_object_id = each.value.object_id
   resource_object_id  = azuread_service_principal.nerdio_manager.object_id
   app_role_id         = "a94e83da-b314-4232-b8c8-94508c5ed533"
 }
-
 
 resource "azuread_app_role_assignment" "reviewers" {
   for_each = data.azuread_user.reviewers

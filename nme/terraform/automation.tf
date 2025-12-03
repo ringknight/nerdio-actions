@@ -82,9 +82,7 @@ resource "azurerm_automation_variable_string" "nerdio" {
   encrypted               = each.value.encrypted
 }
 
-#
 # Automation Run-As Account
-#
 resource "azuread_application" "automation_runas" {
   display_name = "Nerdio Manager Automation"
 
@@ -151,8 +149,7 @@ resource "azurerm_key_vault_certificate" "nerdio" {
     }
   }
 
-depends_on = [ azurerm_key_vault_access_policy.nerdio_WVDAdmin ]
-
+  depends_on = [ azurerm_key_vault_access_policy.nerdio_WVDAdmin ]
 }
 
 # Since we need the private key, we have to get the secret
@@ -204,9 +201,7 @@ resource "azuread_service_principal_certificate" "scripted_action" {
   end_date             = azurerm_key_vault_certificate.nerdio["scripted-action"].certificate_attribute[0].expires
 }
 
-#
 # Private Endpoint
-#
 resource "azurerm_private_endpoint" "automation_webhook" {
   name                = "${azurerm_automation_account.nerdio.name}-webhook-ple"
   resource_group_name = azurerm_automation_account.nerdio.resource_group_name

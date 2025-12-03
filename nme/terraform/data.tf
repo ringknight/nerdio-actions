@@ -1,7 +1,6 @@
 data "azuread_client_config" "current" {}
 data "azurerm_client_config" "current" {}
 data "azurerm_subscription" "current" {}
-
 data "azuread_application_published_app_ids" "well_known" {}
 
 data "azuread_service_principal" "msgraph" {
@@ -9,8 +8,6 @@ data "azuread_service_principal" "msgraph" {
 }
 
 #The below is meant to convert the user_principal onto a valid UUID
-
-
 data "azuread_user" "desktop_admins" {
     for_each = var.desktop_admins
   user_principal_name = each.value
