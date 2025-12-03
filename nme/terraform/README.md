@@ -25,7 +25,7 @@ This Terraform module automates the deployment of Nerdio Manager for Enterprise 
 - Azure Automation Account for runbook execution
 - Key Vault for secure credential storage
 - Virtual Network with private endpoints for secure connectivity
-- Azure AD application and service principal with required permissions
+- Entra ID application and service principal with required permissions
 - Monitoring and logging with Application Insights and Log Analytics
 - Shared Image Gallery for custom images
 
@@ -57,11 +57,11 @@ To deploy this infrastructure, you need the following permissions on the target 
 - **Key Vault Certificates Officer**
 - **Automation Contributor**
 
-### Azure AD (Entra ID) Permissions
+### Entra ID (Entra ID) Permissions
 
 The deployment requires these Entra ID roles:
 
-- **Application Administrator** - To create Azure AD applications and service principals
+- **Application Administrator** - To create Entra ID applications and service principals
 - **Groups Administrator** - To create and manage security groups
 - **Privileged Role Administrator** - To grant admin consent for API permissions (post-deployment)
 
@@ -109,8 +109,8 @@ This configuration uses the following Terraform providers:
 #### 5. SQL Database (`sql.tf`)
 - Azure SQL Server (v12.0)
 - SQL Database: "NerdioManager" (configurable SKU, default: S1)
-- SQL authentication and Azure AD authentication
-- Azure AD admin group for SQL administrators
+- SQL authentication and Entra ID authentication
+- Entra ID admin group for SQL administrators
 - Private endpoint for secure access
 - Auto-generated strong password (30 characters)
 
@@ -121,7 +121,7 @@ This configuration uses the following Terraform providers:
   - Nerdio service principal
   - Deployment identity
 - Stored secrets:
-  - Azure AD client secret
+  - Entra ID client secret
   - SQL connection string
 - Certificates for automation accounts
 - Private endpoint for secure access
@@ -139,7 +139,7 @@ This configuration uses the following Terraform providers:
 - Self-signed certificates (12-month validity, auto-renewal)
 - Private endpoints for webhook and hybrid worker
 
-#### 8. Azure AD Application & Service Principal (`identity.tf`)
+#### 8. Entra ID Application & Service Principal (`identity.tf`)
 - Enterprise application: "Nerdio Manager for Enterprise"
 - **App Roles:**
   - Desktop Admin
@@ -157,7 +157,7 @@ This configuration uses the following Terraform providers:
 - Contributor role on resource group
 
 #### 9. Role Assignments (`role-assignments.tf`)
-- Maps Azure AD users to Nerdio app roles
+- Maps Entra ID users to Nerdio app roles
 - Supports bulk user assignment via variables
 
 ### Monitoring & Logging
@@ -202,7 +202,7 @@ This configuration uses the following Terraform providers:
 | `allow_public_access` | bool | `true` | Enable public access to services. Set to `false` for fully private deployment. |
 | `webapp_sku` | string | `"B3"` | Azure App Service Plan SKU (e.g., `B1`, `B3`, `S1`, `P1v2`). |
 | `sql_sku` | string | `"S1"` | SQL Database SKU (e.g., `Basic`, `S0`, `S1`, `P1`). |
-| `allow_delegated_write_permissions` | bool | `true` | Grant delegated Azure AD write permissions to the Nerdio application. |
+| `allow_delegated_write_permissions` | bool | `true` | Grant delegated Entra ID write permissions to the Nerdio application. |
 | `nerdio_tag_prefix` | string | `"NMW"` | Prefix for Nerdio-specific Azure tags. |
 | `desktop_admins` | map(string) | `{}` | Map of users for Desktop Admin role (key = identifier, value = UPN). |
 | `desktop_users` | map(string) | `{}` | Map of users for Desktop User role (key = identifier, value = UPN). |
@@ -317,11 +317,7 @@ terraform init
 ### Step 4: Plan the Deployment
 
 ```bash
-# Review what will be created
-terraform plan
-
-# Save the plan to a file (optional but recommended)
-terraform plan -out=tfplan
+terraform plan --var-file=.\terraform.tfvars --out=.\main.tfplan
 ```
 
 Review the output carefully to ensure all resources are correct.
@@ -329,14 +325,10 @@ Review the output carefully to ensure all resources are correct.
 ### Step 5: Apply the Configuration
 
 ```bash
-# Deploy the infrastructure
-terraform apply
-
-# Or use the saved plan
-terraform apply tfplan
+terraform apply ".\main.tfplan"
 ```
 
-When prompted, type `yes` to confirm the deployment.
+If prompted, type `yes` to confirm the deployment.
 
 The deployment typically takes **10-15 minutes** to complete.
 
@@ -356,7 +348,7 @@ After Terraform completes successfully, perform these additional steps:
 
 ### 1. Grant Admin Consent for API Permissions
 
-The Nerdio Azure AD application requires admin consent for Microsoft Graph API permissions:
+The Nerdio Entra ID application requires admin consent for Microsoft Graph API permissions:
 
 1. Navigate to the [Azure Portal](https://portal.azure.com)
 2. Go to **Azure Active Directory** > **App registrations**
@@ -502,8 +494,8 @@ terraform destroy -refresh=false
 
 After running `terraform destroy`, some resources may require manual cleanup:
 
-#### 1. Azure AD Application
-The Azure AD application may not be fully deleted:
+#### 1. Entra ID Application
+The Entra ID application may not be fully deleted:
 
 ```bash
 # List all Nerdio-related applications
@@ -568,7 +560,7 @@ terraform state list
 # Remove state files (if no longer needed)
 rm -f terraform.tfstate
 rm -f terraform.tfstate.backup
-rm -f tfplan
+rm -f main.tfplan
 ```
 
 ### Destroy Timeouts
@@ -628,7 +620,7 @@ resource "azurerm_private_endpoint" "example" {
 3. **Implement Azure Bastion**: For secure VM access
 4. **Configure NSG Rules**: Customize rules in `vnet.nsg-rules.tf`
 5. **Enable Azure Policy**: For compliance and governance
-6. **Implement Azure AD Conditional Access**: Restrict access by location/device
+6. **Implement Entra ID Conditional Access**: Restrict access by location/device
 7. **Enable Multi-Factor Authentication**: For all admin accounts
 
 ## Troubleshooting
@@ -666,12 +658,12 @@ resource "azurerm_private_endpoint" "example" {
 4. Verify SQL firewall rules
 5. Check connection string in Key Vault
 
-#### Issue: Azure AD Admin Consent Required
+#### Issue: Entra ID Admin Consent Required
 
 **Symptoms**: Users cannot sign in to Nerdio
 
 **Solutions**:
-1. Navigate to Azure AD > App registrations
+1. Navigate to Entra ID > App registrations
 2. Select the Nerdio application
 3. Go to API permissions
 4. Click "Grant admin consent for {tenant}"
@@ -747,7 +739,7 @@ nme/terraform/
 ├── sql.tf                              # SQL Server and database
 ├── keyvault.tf                         # Key Vault and secrets
 ├── automation.tf                       # Automation account and runbooks
-├── identity.tf                         # Azure AD app and service principal
+├── identity.tf                         # Entra ID app and service principal
 ├── sig.tf                              # Shared Image Gallery
 ├── private-dns.tf                      # Private DNS zones
 ├── monitoring.tf                       # Application Insights
@@ -758,7 +750,7 @@ nme/terraform/
 ├── terraform.tfvars                    # Variable values (customize this)
 ├── .terraform.lock.hcl                 # Provider version lock file
 └── _resources/
-    └── nerdio.png                      # Nerdio logo for Azure AD app
+    └── nerdio.png                      # Nerdio logo for Entra ID app
 ```
 
 ## Support and Resources
@@ -774,7 +766,7 @@ nme/terraform/
 ### Terraform Resources
 
 - [Terraform Azure Provider Documentation](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs)
-- [Terraform Azure AD Provider Documentation](https://registry.terraform.io/providers/hashicorp/azuread/latest/docs)
+- [Terraform Entra ID Provider Documentation](https://registry.terraform.io/providers/hashicorp/azuread/latest/docs)
 
 ### Getting Help
 
