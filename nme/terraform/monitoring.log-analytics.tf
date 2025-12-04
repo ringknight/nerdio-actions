@@ -1,6 +1,4 @@
-#
 # Deploy the Datasources for the Log Analytics Agent
-#
 
 resource "azurerm_log_analytics_datasource_windows_event" "system_events" {
   name                = "SystemEvents"

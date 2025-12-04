@@ -46,6 +46,7 @@ resource "azurerm_windows_web_app" "nerdio" {
     "RoleAuthorization:Enabled"              = "True"
     "WVD:AadTenantId"                        = data.azurerm_subscription.current.tenant_id
     "WVD:SubscriptionId"                     = data.azurerm_subscription.current.subscription_id
+    "WEBSITE_RUN_FROM_PACKAGE"               = var.packageUri
   }
 
   identity {
@@ -85,29 +86,47 @@ resource "azurerm_private_endpoint" "webapp" {
     subresource_names              = ["sites"]
   }
 
-  # depends_on = [ azapi_resource.msdeploy,azurerm_key_vault_access_policy.nerdio_service_principal,azurerm_key_vault_access_policy.nerdio_webapp,azurerm_key_vault_certificate.nerdio,azurerm_key_vault_secret.azuread_client_secret,azurerm_key_vault_secret.sql_connection ]
+  depends_on = [ 
+    azapi_resource.msdeploy,  # Deploy package BEFORE creating private endpoint
+    azurerm_key_vault_access_policy.nerdio_service_principal,
+    azurerm_key_vault_access_policy.nerdio_webapp,
+    azurerm_key_vault_certificate.nerdio,
+    azurerm_key_vault_secret.azuread_client_secret,
+    azurerm_key_vault_secret.sql_connection
+  ]
+
   tags = var.tags
 }
 
+# Wait for web app to be fully configured before deploying package
+resource "time_sleep" "wait_for_webapp" {
+  depends_on = [
+    azurerm_windows_web_app.nerdio,
+    azurerm_key_vault_access_policy.nerdio_webapp
+  ]
+
+  create_duration = "60s"
+}
+
 resource "azapi_resource" "msdeploy" {
-  type = "Microsoft.Web/sites/extensions@2025-03-01"
+  type = "Microsoft.Web/sites/extensions@2022-09-01"
   name = "MSDeploy"
   parent_id = azurerm_windows_web_app.nerdio.id
   body = jsonencode({
     properties = {
-     //This is the sitep.zip or the zip deploy package that Nerdio team needs to provide
-         packageUri = var.packageUri
+         packageUri = var.packageUri //This is the sitep.zip or the zip deploy package that Nerdio team needs to provide
      }
-#    kind = "string"
   })
 
   depends_on = [ 
+    time_sleep.wait_for_webapp,  # Wait for webapp to be ready
     azurerm_windows_web_app.nerdio,
-    azurerm_private_endpoint.webapp,
     azurerm_private_endpoint.key_vault,
     azurerm_private_endpoint.sql,
     azurerm_key_vault_access_policy.nerdio_webapp,
-    azurerm_key_vault_secret.sql_connection
+    azurerm_key_vault_secret.sql_connection,
+    azurerm_key_vault_certificate.nerdio,  # Add certificate dependency
+    azurerm_key_vault_secret.azuread_client_secret  # Add secret dependency
   ]
 }
 

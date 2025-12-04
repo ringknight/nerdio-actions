@@ -1,4 +1,3 @@
-#
 # Configuration as per Nerdio documentation https://nmw.zendesk.com/hc/en-us/articles/4731655590679-Advanced-Installation-Create-Azure-AD-Application
 resource "azuread_application" "nerdio_manager" {
   display_name            = "Nerdio Manager for Enterprise - ${lower(var.base_name)}"

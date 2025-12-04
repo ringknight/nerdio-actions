@@ -1,6 +1,4 @@
-#
 # Deploy Data Collection Rules for Azure Monitor agent
-#
 
 resource "azurerm_log_analytics_solution" "event_forwarding" {
   solution_name         = "WindowsEventForwarding"

@@ -126,8 +126,7 @@ resource "azurerm_key_vault_secret" "sql_connection" {
   ])
   key_vault_id = azurerm_key_vault.nerdio.id
 
-depends_on = [ azurerm_key_vault_access_policy.nerdio_WVDAdmin ]
-
+  depends_on = [ azurerm_key_vault_access_policy.nerdio_WVDAdmin ]
 }
 
 # Private Endpoint
@@ -151,6 +150,5 @@ resource "azurerm_private_endpoint" "key_vault" {
     subresource_names              = ["vault"]
   }
 
-  # depends_on = [ azapi_resource.msdeploy,azurerm_key_vault_access_policy.nerdio_service_principal,azurerm_key_vault_access_policy.nerdio_webapp,azurerm_key_vault_certificate.nerdio,azurerm_key_vault_secret.azuread_client_secret,azurerm_key_vault_secret.sql_connection ]
   tags = var.tags
 }
