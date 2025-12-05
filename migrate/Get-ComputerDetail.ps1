@@ -169,10 +169,20 @@ process {
         }
         return $false
     }
+    
+    #check if hybrid joined
+    if ($DsRegStatus.AzureADJoined -and $DsRegStatus.DomainJoined) {
+        $isHybridJoined = $true
+        
+        #optional?
+        $DsRegStatus.AzureADJoined = $null
+        $DsRegStatus.DomainJoined = $null
+    }
 
     # Output the results
     [PSCustomObject]@{
         ComputerName        = [System.Net.Dns]::GetHostName()
+        HybridJoined        = $isHybridJoined
         EntraIdJoined       = $DsRegStatus.AzureADJoined
         DomainJoined        = $DsRegStatus.DomainJoined
         UserPrincipalName   = $IdentityStore.UserName
