@@ -178,6 +178,7 @@ process {
         $DsRegStatus.AzureADJoined = $null
         $DsRegStatus.DomainJoined = $null
     }
+
     # Output the results
     [PSCustomObject]@{
         ComputerName        = [System.Net.Dns]::GetHostName()
