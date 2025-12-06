@@ -106,4 +106,4 @@ terraform.rc
 
 # NME artifacts
 nme/artifacts/**
-
+nme/terraform-sf/**
