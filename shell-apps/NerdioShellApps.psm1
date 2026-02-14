@@ -184,8 +184,8 @@ function Get-AppMetadata {
     process {
         switch ($Definition.source.type) {
             "Evergreen" {
-                Write-Information -MessageData "$($PSStyle.Foreground.Cyan)Query: Get-EvergreenApp -Name $($Definition.source.app) | Where-Object { $($Definition.source.filter) }"
-                $Metadata = Get-EvergreenApp -Name $Definition.source.app | `
+                Write-Information -MessageData "$($PSStyle.Foreground.Cyan)Query: Get-EvergreenAppFromApi -Name $($Definition.source.app) | Where-Object { $($Definition.source.filter) }"
+                $Metadata = Get-EvergreenAppFromApi -Name $Definition.source.app | `
                     Where-Object { Invoke-Expression "$($Definition.source.filter)" } | `
                     Select-Object -First 1
                 Write-Information -MessageData "$($PSStyle.Foreground.Cyan)Found version: $($Metadata.Version)"
@@ -466,10 +466,10 @@ function New-ShellApp {
             $File = New-ShellAppFile @params
 
             # Update the app definition
-            if ($File.FileType -eq "zip") {
-                Write-Information -MessageData "$($PSStyle.Foreground.Cyan)Using fileUnzip: true for zip files."
-                $Definition.fileUnzip = $true
-            }
+            # if ($File.FileType -eq "zip") {
+            #     Write-Information -MessageData "$($PSStyle.Foreground.Cyan)Using fileUnzip: true for zip files."
+            #     $Definition.fileUnzip = $true
+            # }
             $Definition.versions[0].name = $AppMetadata.Version
             $Definition.versions[0].file.sourceUrl = $File.SourceUrl
             $Definition.versions[0].file.sha256 = $File.Sha256
