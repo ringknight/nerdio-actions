@@ -1,3 +1,6 @@
+# Unzip the attached binary to the current directory
+Expand-Archive -Path $Context.GetAttachedBinary() -DestinationPath $PWD -Force
+
 Get-ChildItem -Path $PWD -Recurse -Include "paint.*msi" | ForEach-Object {
     $Context.Log("Installing Paint.NET from: $($_.FullName)")
     $params = @{
