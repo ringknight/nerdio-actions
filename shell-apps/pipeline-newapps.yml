@@ -37,7 +37,10 @@ jobs:
 
   # Install the required PowerShell modules
   - pwsh: |
-      Install-Module -Name "Evergreen", "VcRedist" -AllowClobber -Force -Scope CurrentUser
+      Set-PSResourceRepository -Name PSGallery -Trusted
+      Install-PSResource -Name "Az.Accounts", "Az.Storage", "VcRedist" -Scope CurrentUser -Reinstall
+      Install-PSResource -Name "Evergreen" -Prerelease -Scope CurrentUser -Reinstall
+      Update-Evergreen
     name: modules
     displayName: 'Install Modules'
     workingDirectory: $(build.sourcesDirectory)
@@ -68,6 +71,7 @@ jobs:
       ScriptType: 'InlineScript'
       Inline: |
         $InformationPreference = "Continue"
+        Import-Module -Name "Az.Accounts", "Az.Storage", "Evergreen", "VcRedist" -Force
         Import-Module -Name "./NerdioShellApps.psm1" -Force
         Set-AzContext -SubscriptionId $(SubscriptionId) -TenantId $(TenantId)
         $params = @{
@@ -151,9 +155,9 @@ jobs:
         Get-ShellApp | ForEach-Object {
             $ExistingVersions = Get-ShellAppVersion -Id $_.id | `
                 Where-Object { $_.isPreview -eq $false } | `
-                Sort-Object -Property @{ Expression = { [System.Version]$_.Version }; Descending = $true }
+                Sort-Object -Property @{ Expression = { [System.Version]$_.name }; Descending = $false }
             if ($ExistingVersions.Count -gt $KeepCount) {
-                $VersionsToRemove = $ExistingVersions | Select-Object -Skip ($ExistingVersions.Count - $KeepCount)
+                $VersionsToRemove = $ExistingVersions | Select-Object -Last ($ExistingVersions.Count - $KeepCount)
                 foreach ($Version in $VersionsToRemove) {
                     $Result = Remove-ShellAppVersion -Id $_.id -Name $Version.name -Confirm:$false
                     $Result.job.status
@@ -201,7 +205,7 @@ jobs:
         Get-ShellApp | ForEach-Object {
             $ExistingVersions = Get-ShellAppVersion -Id $_.id | `
                 Where-Object { $_.isPreview -eq $false } | `
-                Sort-Object -Property @{ Expression = { [System.Version]$_.Version }; Descending = $true }
+                Sort-Object -Property @{ Expression = { [System.Version]$_.name }; Descending = $true }
             [PSCustomObject]@{
                 publisher     = $_.publisher
                 name          = $_.name
