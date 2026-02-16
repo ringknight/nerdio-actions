@@ -1,6 +1,6 @@
 # Nerdio Manager scripts
 
-## 🖥️ Scripted Actions
+## 🖥️ Scripted Actions - /actions
 
 PowerShell scripts for integration with [Scripted Actions in Nerdio Manager](https://nmehelp.getnerdio.com/hc/en-us/articles/26124327585421-Scripted-Actions-Overview).
 
@@ -13,14 +13,22 @@ These scripts can be added to your Nerdio Manager install by specifying the path
 * `/actions/tweaks` - scripts for implementing specific configurations and tweaks for gold images or session hosts
 * `/actions/optimise` - scripts to optimise the Windows image
 
-## 🐚 Shell Apps
+## 🧩 Apps/AppV - /apps/appv
+
+A set of scripts for installing applications to capture via application virtualization tools such as App-V.
+
+## 📦 Nerdio Manager deployment - /nme
+
+Terraform template for the deployment of Nerdio Manager for Enterprise into a target Azure subscription.
+
+## 🐚 Shell Apps - /shell-apps
 
 A set of example scripts for installing applications via [Shell Apps](https://nmehelp.getnerdio.com/hc/en-us/articles/25499430784909-UAM-Shell-apps-overview-and-usage). Also see: [Automating Nerdio Manager Shell Apps, with Evergreen, Part 1](https://stealthpuppy.com/nerdio-shell-apps-p1/).
 
-## 🛠️ Migrate
+## 🧪 Test - /tests
 
-A set of scripts for various functions - scripts include uninstall of third party virtual desktop agents to assist in the migration to Azure Virtual Desktop or Windows 365.
+Windows image validation using Pester.
 
-## 🧩 Apps/AppV
+## 🛠️ Variables - /variables
 
-A set of scripts for installing applications to capture via application virtualization tools such as App-V.
+Extending and simplifying Nerdio Manager secure variables with values hosted in a JSON file.
