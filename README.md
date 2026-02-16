@@ -1,10 +1,11 @@
 # Nerdio Manager scripts
 
+> [!CAUTION]
+> This code is provided as-is, without warranty or support of any kind.
+
 ## 🖥️ Scripted Actions - /actions
 
 PowerShell scripts for integration with [Scripted Actions in Nerdio Manager](https://nmehelp.getnerdio.com/hc/en-us/articles/26124327585421-Scripted-Actions-Overview).
-
-    Note: this code is provided as-is, without warranty or support of any kind.
 
 These scripts can be added to your Nerdio Manager install by specifying the paths below to add individual directories:
 
