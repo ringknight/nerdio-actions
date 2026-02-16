@@ -25,6 +25,8 @@ variables:
 - group: 'Credentials' # Update to match your environment
 - name: service
   value: 'sc-rg-Avd1Images-aue' # Update to match your environment
+- name: EVERGREEN_APPS_PATH
+  value: $(Pipeline.Workspace)/.evergreen
 
 jobs:
 - job: Import
@@ -35,11 +37,23 @@ jobs:
   - checkout: self
     displayName: 'Checkout repository'
 
+  - task: Cache@2
+    inputs:
+        key: '"$(EVERGREEN_APPS_PATH)" | "$(Agent.OS)"'
+        restoreKeys: |
+            "$(EVERGREEN_APPS_PATH)" | "$(Agent.OS)"
+            "$(EVERGREEN_APPS_PATH)"
+        path: '$(EVERGREEN_APPS_PATH)'
+    displayName: Cache Evergreen apps and manifests
+
   # Install the required PowerShell modules
   - pwsh: |
       Set-PSResourceRepository -Name PSGallery -Trusted
       Install-PSResource -Name "Az.Accounts", "Az.Storage", "VcRedist" -Scope CurrentUser -Reinstall
       Install-PSResource -Name "Evergreen" -Prerelease -Scope CurrentUser -Reinstall
+      $Env:EVERGREEN_APPS_PATH = "$(EVERGREEN_APPS_PATH)"
+      if (-Not (Test-Path -Path $Env:EVERGREEN_APPS_PATH)) { New-Item -Path $Env:EVERGREEN_APPS_PATH -ItemType "Directory" -Force | Out-Null }
+      Write-Host "Evergreen apps path: $Env:EVERGREEN_APPS_PATH"
       Update-Evergreen
     name: modules
     displayName: 'Install Modules'
@@ -72,6 +86,8 @@ jobs:
       Inline: |
         $InformationPreference = "Continue"
         Import-Module -Name "Az.Accounts", "Az.Storage", "Evergreen", "VcRedist" -Force
+        $Env:EVERGREEN_APPS_PATH = "$(EVERGREEN_APPS_PATH)"
+        Write-Host "Evergreen apps path: $Env:EVERGREEN_APPS_PATH"
         Import-Module -Name "./NerdioShellApps.psm1" -Force
         Set-AzContext -SubscriptionId $(SubscriptionId) -TenantId $(TenantId)
         $params = @{
