@@ -4,8 +4,8 @@ This workspace contains a PowerShell runbook implementation that tracks Entra ID
 
 ## Files
 
-- `runbook/Track-EntraGroupRemovals.ps1` - runbook logic with persisted state and Graph delta tracking.
-- `scripts/run-local.ps1` - local execution helper.
+- `Track-EntraGroupRemovals.ps1` - runbook logic with persisted state and Graph delta tracking.
+- `run-local.ps1` - local execution helper.
 
 ## How membership is tracked across runs
 
@@ -89,14 +89,14 @@ Summary output example:
 ## Publish to Azure Automation
 
 1. Create a PowerShell runbook in your Automation Account.
-2. Paste/publish the content of `runbook/Track-EntraGroupRemovals.ps1`.
+2. Paste/publish the content of `Track-EntraGroupRemovals.ps1`.
 3. Configure a schedule.
 4. Start with `ForceFullSync = true` on first run if you want a clean baseline.
 
 ## Local test example
 
 ```powershell
-pwsh ./scripts/run-local.ps1 `
+pwsh ./run-local.ps1 `
   -GroupId "<group-guid>" `
   -ResourceGroupName "<rg-name>" `
   -HostPoolResourceGroupName "<hostpool-rg-name>" `
@@ -112,4 +112,4 @@ When users are removed, the runbook:
 - writes each removed user to output
 - optionally POSTs a payload to `RemovalWebhookUrl`
 
-Customize `Invoke-RemovedUserAction` in `runbook/Track-EntraGroupRemovals.ps1` to integrate your target workflow.
+Customize `Invoke-RemovedUserAction` in `Track-EntraGroupRemovals.ps1` to integrate your target workflow.
