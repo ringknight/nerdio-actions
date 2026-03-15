@@ -2,7 +2,7 @@
     "name": "Chrome",
     "description": "The browser built by Google. Browse with the power of Google.",
     "isPublic": true,
-    "publisher": "Microsoft",
+    "publisher": "Google",
     "detectScript": "#detectScript",
     "installScript": "#installScript",
     "uninstallScript": "#uninstallScript",
