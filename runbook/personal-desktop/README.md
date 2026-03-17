@@ -113,3 +113,49 @@ When users are removed, the runbook:
 - optionally POSTs a payload to `RemovalWebhookUrl`
 
 Customize `Invoke-RemovedUserAction` in `Track-EntraGroupRemovals.ps1` to integrate your target workflow.
+
+## Running locally (example)
+
+```powershell
+
+[string]$GroupId = "<group guid>"
+[string]$ResourceGroupName = "rg-Avd1Images-aue"
+[string]$HostPoolResourceGroupName = "rg-Avd1-HostPool01-aue"
+[string]$HostPoolName = "vdpool-Avd1-HostPool01-Personal-aue"
+[string]$StateStorageAccountName = "<storage account name>"
+[string]$StateStorageContainerName = "runbook-state"
+[string]$DesktopVmResourceGroupName = "rg-Avd1-HostPool01-aue"
+[string]$AuditStorageAccountName = "<storage account name>"
+[string]$AuditStorageResourceGroupName = "rg-Avd1Images-aue"
+[string]$AuditStorageContainerName = "runbook-deletion-audit"
+[string]$AuditBlobPrefix = "deleted-resources"
+[string]$StatePath = "./local-state/state.json"
+[System.String]$ClientId = "<client id>"
+[System.String]$ClientSecret = "<secret>"
+[System.String]$TenantId = "<tenant id>"
+[switch]$DryRun = $false
+
+$scriptPath = ".\Track-EntraGroupRemovals.ps1"
+& $scriptPath `
+    -GroupId $GroupId `
+    -ResourceGroupName $ResourceGroupName `
+    -HostPoolResourceGroupName $HostPoolResourceGroupName `
+    -HostPoolName $HostPoolName `
+    -StateStorageAccountName $StateStorageAccountName `
+    -StateStorageContainerName $StateStorageContainerName `
+    -DesktopVmResourceGroupName $DesktopVmResourceGroupName `
+    -AuditStorageAccountName $AuditStorageAccountName `
+    -AuditStorageResourceGroupName $AuditStorageResourceGroupName `
+    -AuditStorageContainerName $AuditStorageContainerName `
+    -AuditBlobPrefix $AuditBlobPrefix `
+    -DryRun:$DryRun `
+    -UseLocalState `
+    -LocalStateFilePath $StatePath `
+    -RemovalWebhookUrl $RemovalWebhookUrl `
+    -ForceFullSync:$ForceFullSync `
+    -SkipAzLogin:$false `
+    -Verbose `
+    -ClientId $ClientId `
+    -ClientSecret $ClientSecret `
+    -TenantId $TenantId
+```
