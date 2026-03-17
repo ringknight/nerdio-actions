@@ -107,3 +107,5 @@ terraform.rc
 # NME artifacts
 nme/artifacts/**
 nme/terraform-sf/**
+runbook/personal-desktop/Start-Local.ps1
+runbook/personal-desktop/local-state/state.json
