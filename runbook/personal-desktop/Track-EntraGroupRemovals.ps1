@@ -460,6 +460,60 @@ function Get-VirtualMachineNameFromSessionHost {
     return ($SessionHostFqdn.Split('.')[0])
 }
 
+function Get-ObjectPropertyValue {
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory = $true)]
+        [AllowNull()]
+        [object]$InputObject,
+        [Parameter(Mandatory = $true)]
+        [System.String]$PropertyName,
+        [AllowNull()]
+        [object]$DefaultValue = $null
+    )
+
+    if ($null -eq $InputObject -or [System.String]::IsNullOrWhiteSpace($PropertyName)) {
+        return $DefaultValue
+    }
+
+    try {
+        $property = $InputObject.PSObject.Properties[$PropertyName]
+        if ($null -ne $property) {
+            return $property.Value
+        }
+    }
+    catch {
+        return $DefaultValue
+    }
+
+    return $DefaultValue
+}
+
+function Write-ActionObjectDetails {
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory = $true)]
+        [System.String]$Label,
+        [AllowNull()]
+        [object]$InputObject
+    )
+
+    if ($null -eq $InputObject) {
+        Write-Host "$($Label): <null>" -ForegroundColor DarkCyan
+        return
+    }
+
+    $objectType = $InputObject.GetType().FullName
+    Write-Host "$Label type: $objectType" -ForegroundColor DarkCyan
+    try {
+        $payloadJson = $InputObject | ConvertTo-Json -Depth 8 -Compress
+        Write-Host "$Label payload: $payloadJson" -ForegroundColor DarkCyan
+    }
+    catch {
+        Write-Host "$Label payload could not be serialized: $($_.Exception.Message)" -ForegroundColor DarkYellow
+    }
+}
+
 function Get-ResourceSummaryById {
     [CmdletBinding()]
     param(
@@ -494,6 +548,7 @@ function Remove-ResourceById {
     )
 
     $summary = Get-ResourceSummaryById -ResourceId $ResourceId
+    Write-Host "Resource summary resolved for removal: id=$($summary.id), name=$($summary.name), type=$($summary.resourceType), group=$($summary.resourceGroup)" -ForegroundColor DarkCyan
     $status = "Deleted"
     $errorMessage = $null
 
@@ -517,6 +572,7 @@ function Remove-ResourceById {
             break
         }
         catch {
+            Write-Host "Remove failed for $($summary.name) on attempt $($attempt): $($_.Exception.Message)" -ForegroundColor Yellow
             if ($attempt -eq 3) {
                 $status = "Failed"
                 $errorMessage = $_.Exception.Message
@@ -567,6 +623,9 @@ function Remove-AssignedVirtualMachineResources {
             }
         }
     }
+
+    $resourceIds = @($resourceIds | Where-Object { -not [System.String]::IsNullOrWhiteSpace($_) } | Select-Object -Unique)
+    Write-Host ("Resolved {0} VM-linked resources for removal: {1}" -f $resourceIds.Count, ($resourceIds -join ", ")) -ForegroundColor DarkCyan
 
     $results = @()
     foreach ($resourceId in $resourceIds) {
@@ -664,6 +723,7 @@ function Save-DeletionAuditRecord {
 
     $blobRef = $container.CloudBlobContainer.GetBlockBlobReference($blobName)
     $blobRef.UploadText($json)
+    Write-Information "Audit record written to storage account '$($StorageContext.StorageAccountName)', container '$ContainerName', blob '$blobName'."
 }
 
 function Get-RunState {
@@ -732,6 +792,7 @@ function Save-RunState {
 
     $blobRef = $container.CloudBlobContainer.GetBlockBlobReference($BlobName)
     $blobRef.UploadText($json)
+    Write-Information "State saved to storage account '$($StorageContext.StorageAccountName)', container '$ContainerName', blob '$BlobName'."
 }
 
 function Get-FullUserMemberIds {
@@ -926,6 +987,7 @@ function Invoke-RemovedUserAction {
     Write-Host "Removed users detected: $(@($RemovedUsers).Count)"
     foreach ($user in $RemovedUsers) {
         Write-Host ("Removed: id={0}, upn={1}, displayName={2}" -f $user.id, $user.userPrincipalName, $user.displayName)
+        Write-ActionObjectDetails -Label "Removed user object" -InputObject $user
 
         $auditRecord = [ordered]@{
             runId                  = $RunId
@@ -961,6 +1023,7 @@ function Invoke-RemovedUserAction {
             Save-DeletionAuditRecord -Record $auditRecord -StorageContext $AuditStorageContext -ContainerName $AuditStorageContainerName -BlobPrefix $AuditBlobPrefix
             continue
         }
+        Write-ActionObjectDetails -Label "Assigned session host object" -InputObject $sessionHost
 
         $sessionHostFqdn = Get-SessionHostFqdn -SessionHost $sessionHost
         $vmName = Get-VirtualMachineNameFromSessionHost -SessionHostFqdn $sessionHostFqdn
@@ -981,6 +1044,7 @@ function Invoke-RemovedUserAction {
             Save-DeletionAuditRecord -Record $auditRecord -StorageContext $AuditStorageContext -ContainerName $AuditStorageContainerName -BlobPrefix $AuditBlobPrefix
             continue
         }
+        Write-Host "Resolved VM object: name=$vmName, id=$($vm.Id), group=$DesktopVmResourceGroupName" -ForegroundColor DarkCyan
 
         # Capture VM resource details for audit record
         $auditRecord.vmResourceId = $vm.Id
@@ -993,6 +1057,7 @@ function Invoke-RemovedUserAction {
         }
 
         $sessionHostRemovalResult = Remove-SessionHostFromHostPool -HostPoolResourceGroupName $HostPoolResourceGroupName -HostPoolName $HostPoolName -SessionHostName $sessionHostFqdn -DryRun:$DryRun
+    Write-ActionObjectDetails -Label "Session host removal result" -InputObject $sessionHostRemovalResult
         $actionResults = @($sessionHostRemovalResult)
 
         if ($sessionHostRemovalResult.status -eq "Failed") {
@@ -1003,17 +1068,22 @@ function Invoke-RemovedUserAction {
         else {
             $deletionResults = Remove-AssignedVirtualMachineResources -VirtualMachine $vm -DryRun:$DryRun
             $actionResults += @($deletionResults)
+            foreach ($deletionResult in @($deletionResults)) {
+                Write-ActionObjectDetails -Label "Resource removal result" -InputObject $deletionResult
+            }
         }
 
         $resourceRecords = @()
         foreach ($result in $actionResults) {
             # Safely extract properties from result object, handling cases where properties may not exist
-            $resourceGroupValue = if ($null -ne $result -and $result.PSObject.Properties.Name -contains "resourceGroup") { $result.resourceGroup } else { $null }
-            $resourceIdValue = if ($null -ne $result -and $result.PSObject.Properties.Name -contains "id") { $result.id } else { $null }
-            $resourceNameValue = if ($null -ne $result -and $result.PSObject.Properties.Name -contains "name") { $result.name } else { $null }
-            $resourceTypeValue = if ($null -ne $result -and $result.PSObject.Properties.Name -contains "resourceType") { $result.resourceType } else { $null }
-            $statusValue = if ($null -ne $result -and $result.PSObject.Properties.Name -contains "status") { $result.status } else { $null }
-            $errorValue = if ($null -ne $result -and $result.PSObject.Properties.Name -contains "error") { $result.error } else { $null }
+            $resourceGroupValue = Get-ObjectPropertyValue -InputObject $result -PropertyName "resourceGroup"
+            $resourceIdValue = Get-ObjectPropertyValue -InputObject $result -PropertyName "id"
+            $resourceNameValue = Get-ObjectPropertyValue -InputObject $result -PropertyName "name"
+            $resourceTypeValue = Get-ObjectPropertyValue -InputObject $result -PropertyName "resourceType"
+            $statusValue = Get-ObjectPropertyValue -InputObject $result -PropertyName "status"
+            $errorValue = Get-ObjectPropertyValue -InputObject $result -PropertyName "error"
+
+            Write-Host ("Action record built: status={0}, name={1}, type={2}, group={3}" -f $statusValue, $resourceNameValue, $resourceTypeValue, $resourceGroupValue) -ForegroundColor DarkCyan
 
             $resourceRecords += [PSCustomObject]@{
                 runId             = $RunId
@@ -1036,7 +1106,10 @@ function Invoke-RemovedUserAction {
         $auditRecord.deletedResources = $resourceRecords
         $resourceActionResults += $resourceRecords
 
-        $failed = @($actionResults | Where-Object { $null -ne $_ -and $_.PSObject.Properties.Name -contains 'status' -and $_.status -ne "Deleted" -and $_.status -ne "DryRun" })
+        $failed = @($actionResults | Where-Object {
+                $status = [System.String](Get-ObjectPropertyValue -InputObject $_ -PropertyName "status")
+                $null -ne $_ -and -not [System.String]::IsNullOrWhiteSpace($status) -and $status -ne "Deleted" -and $status -ne "DryRun"
+            })
         if ($auditRecord.actionStatus -eq "SessionHostRemovalFailed") {
             # Keep SessionHostRemovalFailed set above.
         }
@@ -1045,11 +1118,13 @@ function Invoke-RemovedUserAction {
         }
         elseif ($failed.Count -gt 0) {
             $auditRecord.actionStatus = "PartialFailure"
-            $auditRecord.errors = @($failed | ForEach-Object { if ($null -ne $_ -and $_.PSObject.Properties.Name -contains 'error') { $_.error } })
+            $auditRecord.errors = @($failed | ForEach-Object { Get-ObjectPropertyValue -InputObject $_ -PropertyName "error" } | Where-Object { -not [System.String]::IsNullOrWhiteSpace($_) })
         }
         else {
             $auditRecord.actionStatus = "Deleted"
         }
+
+        Write-Host ("Audit status for user {0}: {1}" -f $user.userPrincipalName, $auditRecord.actionStatus) -ForegroundColor DarkCyan
 
         Save-DeletionAuditRecord -Record $auditRecord -StorageContext $AuditStorageContext -ContainerName $AuditStorageContainerName -BlobPrefix $AuditBlobPrefix
     }
