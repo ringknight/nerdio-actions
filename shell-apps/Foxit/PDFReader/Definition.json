@@ -22,6 +22,6 @@
         "import": true,
         "type": "Evergreen",
         "app": "FoxitReader",
-        "filter": "$_.Type -eq \"msi\""
+        "filter": "$_.Type -eq \"exe\""
     }
 }
