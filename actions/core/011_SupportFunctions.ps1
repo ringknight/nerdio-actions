@@ -24,7 +24,7 @@ Install-PackageProvider -Name "PowerShellGet" -MinimumVersion "2.2.5" -Force
 Write-LogFile -Message "Set-PSRepository: PSGallery" -LogLevel 1
 Set-PSRepository -Name "PSGallery" -InstallationPolicy "Trusted"
 
-# Evergreen: https://eucpilots.com/evergreen-docs/
+# Evergreen: https://eucpilots.com/evergreen/
 # VcRedist: https://vcredist.com/
 # PSWindowsUpdate: https://www.powershellgallery.com/packages/PSWindowsUpdate
 Set-PSRepository -Name "PSGallery" -InstallationPolicy "Trusted"
